@@ -1,0 +1,19 @@
+include _bemto
+
+mixin i()
+  +b('i').icon(class="icon_#{attributes.class}")
+    block
+
+mixin link(url)
+  if !url
+    url = "#"
+  a(attributes, href=url)
+    block
+
+mixin elink(url)
+  if !url
+    url = "#"
+  +e('a')(attributes, href=url)
+    block
+
+include _layout
