@@ -139,7 +139,7 @@
       node.link = self._setLinkTitle(node.link, type, o);
       node.icon = self._setIconClass(node.icon, type);
       node.input = self._setInputType(node.input, type, info.attributes);
-      self._setFocusBinds(node.input, node.link, info);
+      self._setFocusBinds(node.input, info);
       info.nowType = type;
       info.nextType = self._getNextType(info.nowType);
       if (info.isHasFocus) {
