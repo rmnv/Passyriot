@@ -36,11 +36,13 @@
       return element.get(0).attributes;
     },
     _setAttributes: function(element, attributes) {
-      var i, _i, _ref;
-      for (i = _i = 0, _ref = attributes.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+      var i;
+      i = 0;
+      while (i < attributes.length) {
         if (attributes[i].name !== 'type') {
           element.attr(attributes[i].name, attributes[i].value);
         }
+        i++;
       }
       return element;
     },

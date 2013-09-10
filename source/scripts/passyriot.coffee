@@ -30,9 +30,11 @@ self =
     return element.get(0).attributes
 
   _setAttributes: (element, attributes) ->
-    for i in [0...attributes.length]
+    i = 0
+    while i < attributes.length
       unless attributes[i].name is 'type'
         element.attr(attributes[i].name, attributes[i].value)
+      i++
     return element
 
 
