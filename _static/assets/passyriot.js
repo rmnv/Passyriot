@@ -76,8 +76,8 @@
     },
     _setIconClass: function(icon, type) {
       var newClass, oldClass;
-      oldClass = ICON_CLOSED_CLASS;
-      newClass = ICON_OPENED_CLASS;
+      oldClass = ICON_OPENED_CLASS;
+      newClass = ICON_CLOSED_CLASS;
       if (type === TYPES[0]) {
         oldClass = [newClass, newClass = oldClass][0];
       }

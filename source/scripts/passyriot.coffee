@@ -68,8 +68,8 @@ self =
 
   # toggle passy__icon_closed / passy__icon_opened
   _setIconClass: (icon, type) ->
-    oldClass = ICON_CLOSED_CLASS
-    newClass = ICON_OPENED_CLASS
+    oldClass = ICON_OPENED_CLASS
+    newClass = ICON_CLOSED_CLASS
     if type is TYPES[0]
       oldClass = [newClass, newClass = oldClass][0] # var reverse
     icon.removeClass(oldClass).addClass(newClass)
