@@ -10,7 +10,7 @@ window.after = (ms, fn) ->
 
 jQuery ($) ->
 
-  $('.passyriot').passyriot()
+#  $('.passyriot').eq(1).passyriot()
 
   # $('.passyriot').passyriot('type')
   # $('.passyriot').passyriot('type', 'toggle')

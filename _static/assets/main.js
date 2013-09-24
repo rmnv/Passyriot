@@ -11,8 +11,6 @@
     return setTimeout(fn, ms);
   };
 
-  jQuery(function($) {
-    return $('.passyriot').passyriot();
-  });
+  jQuery(function($) {});
 
 }).call(this);

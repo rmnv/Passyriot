@@ -7,15 +7,7 @@
 
 (function() {
   'use strict';
-  var ICON_CLASS, ICON_CLOSED_CLASS, ICON_OPENED_CLASS, INPUT_CLASS, LINK_CLASS, PASSY_CLASS, TYPES, defaultOptions, self;
-
-  defaultOptions = {
-    defaultType: 'text',
-    titleOfShow: 'Show simbols',
-    titleOfHide: 'Hide simbols',
-    hashOnHover: 'passyriot',
-    tabindex: false
-  };
+  var ICON_CLASS, ICON_CLOSED_CLASS, ICON_OPENED_CLASS, INPUT_CLASS, LINK_CLASS, PASSY_CLASS, TYPES, self;
 
   PASSY_CLASS = 'passy';
 
@@ -32,6 +24,39 @@
   TYPES = ['text', 'password'];
 
   self = {
+    _setSelect: function(input, start, end) {
+      if (!end) {
+        end = start;
+      }
+      return input.each(function() {
+        var range;
+        if (this.setSelectionRange) {
+          this.focus();
+          return this.setSelectionRange(start, end);
+        } else if (this.createTextRange) {
+          range = this.createTextRange();
+          range.collapse(true);
+          range.moveEnd("character", end);
+          range.moveStart("character", start);
+          range.select();
+          return input.focus();
+        }
+      });
+    },
+    getSelect: function(input) {
+      var CaretPos, Sel;
+      CaretPos = 0;
+      if (document.selection) {
+        input.focus();
+        Sel = document.selection.createRange();
+        Sel.moveStart("character", -input.value.length);
+        CaretPos = Sel.text.length;
+      }
+      if (input.selectionStart || input.selectionStart === 0) {
+        CaretPos = input.selectionStart;
+      }
+      return CaretPos;
+    },
     _getAttributes: function(element) {
       return element.get(0).attributes;
     },
@@ -57,7 +82,7 @@
     },
     _setLinkTitle: function(link, type, o) {
       var title;
-      title = type === TYPES[0] ? o.titleOfHide : o.titleOfShow;
+      title = type === TYPES[0] ? o.titleofhide : o.titleofshow;
       link.attr('title', title);
       return link;
     },
@@ -169,17 +194,25 @@
     },
     init: function(userOptions) {
       return this.each(function() {
-        var data, input, node, o, options, startTag, startType;
+        var data, defaultOptions, input, node, o, options, startTag, startType;
         if (!data) {
           input = $(this);
           startTag = input.prop('tagName').toLowerCase();
           startType = input.prop('type');
           if (startTag === 'input' && startType === 'password') {
-            options = $.extend(defaultOptions, userOptions);
+            defaultOptions = {
+              defaulttype: 'text',
+              titleofshow: 'Show simbols',
+              titleofhide: 'Hide simbols',
+              hashonhover: 'passyriot',
+              tabindex: false
+            };
+            options = $.extend({}, defaultOptions, userOptions, input.data());
+            log(options);
             data = self._constructor(input, options);
             node = data.node;
             o = data.options;
-            self.type(o.defaultType, node.input);
+            self.type(o.defaulttype, node.input);
             return $(this);
           } else {
             return $.error(input + 'must be input[type="password"]');
@@ -212,7 +245,7 @@
       node = data.node;
       o = data.options;
       info = data.info;
-      info.nowType = o.defaultType;
+      info.nowType = o.defaulttype;
       info.isFirst = true;
       node.wrapper = wrapper;
       node.input = input.addClass(INPUT_CLASS);
@@ -222,6 +255,10 @@
       return data;
     }
   };
+
+  $(function() {
+    return $('.passyriot:not([data-auto="false"])').passyriot();
+  });
 
   $.fn.passyriot = function(method) {
     if (self[method]) {

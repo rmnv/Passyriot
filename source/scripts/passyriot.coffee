@@ -5,12 +5,6 @@
 ###
 
 'use strict'
-defaultOptions =
-  defaultType: 'text' # text/password
-  titleOfShow: 'Show simbols'
-  titleOfHide: 'Hide simbols'
-  hashOnHover: 'passyriot'
-  tabindex:    false
 
 PASSY_CLASS       = 'passy'
 LINK_CLASS        = PASSY_CLASS  + '__trigger'
@@ -22,8 +16,35 @@ TYPES             = ['text', 'password']
 
 
 
-
 self =
+
+  _setSelect: (input, start, end) ->
+    end = start unless end
+    input.each ->
+      if @setSelectionRange
+        @focus()
+        @setSelectionRange(start, end)
+      else if @createTextRange
+        range = @createTextRange()
+        range.collapse(true)
+        range.moveEnd("character", end)
+        range.moveStart("character", start)
+        range.select()
+        input.focus()
+
+  getSelect: (input) ->
+    CaretPos = 0 # IE Support
+    if document.selection
+      input.focus()
+      Sel = document.selection.createRange()
+      Sel.moveStart "character", -input.value.length
+      CaretPos = Sel.text.length
+
+      # Firefox support
+    if input.selectionStart or input.selectionStart is 0
+      CaretPos = input.selectionStart
+
+    return CaretPos
 
 
   _getAttributes: (element) ->
@@ -49,7 +70,7 @@ self =
 
 
   _setLinkTitle: (link, type, o) ->
-    title = if type is TYPES[0] then o.titleOfHide else o.titleOfShow
+    title = if type is TYPES[0] then o.titleofhide else o.titleofshow
     link.attr('title', title)
     return link
 
@@ -169,10 +190,18 @@ self =
         startTag = input.prop('tagName').toLowerCase()
         startType = input.prop('type')
         if startTag is 'input' and startType is 'password'
-          options = $.extend defaultOptions, userOptions
+          defaultOptions =
+            defaulttype: 'text' # text/password
+            titleofshow: 'Show simbols'
+            titleofhide: 'Hide simbols'
+            hashonhover: 'passyriot'
+            tabindex:    false
+          options = $.extend {},
+            defaultOptions, userOptions, input.data()
+          log options
           data = self._constructor(input, options)
           node = data.node; o = data.options
-          self.type(o.defaultType, node.input)
+          self.type(o.defaulttype, node.input)
           return $(this)
         else
           $.error input + 'must be input[type="password"]'
@@ -196,7 +225,7 @@ self =
     data = wrapper.data('passy')
     node = data.node; o = data.options; info = data.info
 
-    info.nowType  = o.defaultType
+    info.nowType  = o.defaulttype
     info.isFirst  = true
     node.wrapper  = wrapper
     node.input    = input.addClass(INPUT_CLASS)
@@ -205,8 +234,9 @@ self =
     self._setLinkBinds(data.node.link, data)
     return data
 
-
-
+# auto init
+$ ->
+  $('.passyriot:not([data-auto="false"])').passyriot()
 
 $.fn.passyriot = (method) ->
   if self[method]
@@ -215,4 +245,5 @@ $.fn.passyriot = (method) ->
     self.init.apply this, arguments
   else
     $.error method + ' not found'
+
 
