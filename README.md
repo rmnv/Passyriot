@@ -12,35 +12,51 @@ Passyriot.js — jQuery плагин, позволяющий показыват
 - По сути, меняется `type="password"` на `type="text"` и обратно.
 
 
-## Использование
+## Базовое использование
 1. Подключите jQuery, passyriot.js и passyriot.css
-2. Добавьте на страницу поле ввода с типом `password`
+2. Добавьте к вашему полю с паролем класс `passyriot`
 
 	    <head>
     	    <script src="jquery-1.10.2.min.js"></script>
 			<link rel="stylesheet" href="passyriot.css" />
 			<script src="passyriot.js">
-			<script>
-				$(document).ready(function(){
-					$('input[type="password"]').passyriot()
-				});		
-			</script>
 		</head>
 		<body>
-			<input type="password" />
+			<input type="password" class="passyriot" />
 		</body>
+		
+## Инициализация
+У Passyriot.js есть два способа инициализации:
+
+1. Автоматический: плагин сам начинает работать на инпутах с классом `passyriot`.
+2. Привычный для jQuery: `$('.some-class').passyriot()`. В этом случае можно использовать любой айди, или класс, кроме зарезирвированного `.passyriot`.
 
 
 ## Опции
-	
-	var defaultOptions = {
-		defaultType: 'password', // or text
-		titleOfShow: 'Show simbols',
-		titleOfHide: 'Hide simbold',
-		hashOnHover: 'passyriot', // хэш-адрес для глазика
-		tabindex: false // Можно ли табом перейти на глазик
-	};
+- `defaulttype`: `"password"` / `"text"` — показывать или скрывать символы по-умолчанию
+- `titleofshow`: `"Show simbols"` — всплывающая подсказка на глазике (атрибут `title` у псевдоссылки)
+- `titleofhide`: `"Hide simbold"`
+- `hashonhover`: `"Passyriot"` — атрибут `href` у псевдоссылки
+- `tabindex`: `false` / `true` — можно ли табом перейти на глазик
+- `auto`: `true` / `false` — автоматическая инициализация
 
+Опции можно прописывать как в data-атрибутах, так и в массиве, передающимся плагину. У data-атрибутов приоритет будет выше.
+
+Пример с data-атрибутами:
+
+	<input type="password" class="passyriot" data-titleofshow="Показать символы" data-defaulttype="password" />
+
+Пример с привычной передачей массива:
+
+	<script>
+	  $(function() {
+    	$('input[type="password"]').passyriot({
+    		defaulttype: "password",
+    		titleofshow: "Показать символы"
+    	});
+	  });
+	</script>
+	
 
 ## АПИ
 	input.passyriot('type', 'toggle')
