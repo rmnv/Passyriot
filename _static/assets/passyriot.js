@@ -24,41 +24,9 @@
   TYPES = ['text', 'password'];
 
   self = {
-    _setSelect: function(input, start, end) {
-      if (!end) {
-        end = start;
-      }
-      return input.each(function() {
-        var range;
-        if (this.setSelectionRange) {
-          this.focus();
-          return this.setSelectionRange(start, end);
-        } else if (this.createTextRange) {
-          range = this.createTextRange();
-          range.collapse(true);
-          range.moveEnd("character", end);
-          range.moveStart("character", start);
-          range.select();
-          return input.focus();
-        }
-      });
-    },
-    getSelect: function(input) {
-      var CaretPos, Sel;
-      CaretPos = 0;
-      if (document.selection) {
-        input.focus();
-        Sel = document.selection.createRange();
-        Sel.moveStart("character", -input.value.length);
-        CaretPos = Sel.text.length;
-      }
-      if (input.selectionStart || input.selectionStart === 0) {
-        CaretPos = input.selectionStart;
-      }
-      return CaretPos;
-    },
     _setInputType: function(input, type, where) {
       where.prepend(input.detach().attr('type', type));
+      log(where);
       return input;
     },
     _setTitle: function(trigger, type, o) {
@@ -115,7 +83,10 @@
       });
       return trigger;
     },
-    _setFocusBinds: function(input, info) {
+    _setFocusBinds: function(input, data) {
+      var info, o;
+      info = data.info;
+      o = data.options;
       input.on('focusin.passy', function() {
         info.isHasFocus = true;
         return true;
@@ -123,6 +94,9 @@
       input.on('focusout.passy', function() {
         if (!info.isTriggerClick) {
           info.isHasFocus = false;
+          if (o.hideonblur && o.defaulttype === 'password') {
+            return self._setType('password', data);
+          }
           return true;
         }
       });
@@ -136,7 +110,6 @@
       node.trigger = self._setTitle(node.trigger, type, o);
       node.icon = self._setIconClass(node.icon, type);
       node.input = self._setInputType(node.input, type, node.wrapper);
-      self._setFocusBinds(node.input, info);
       info.nowType = type;
       info.nextType = self._getNextType(info.nowType);
       if (info.isHasFocus) {
@@ -167,8 +140,8 @@
     init: function(userOptions) {
       return this.each(function() {
         var data, defaultOptions, input, node, o, options, startTag, startType;
-        if (!data) {
-          input = $(this);
+        input = $(this);
+        if (!input.parents('.' + PASSY_CLASS).length) {
           startTag = input.prop('tagName').toLowerCase();
           startType = input.prop('type');
           if (startTag === 'input' && startType === 'password') {
@@ -176,7 +149,7 @@
               defaulttype: 'password',
               titleofshow: 'Show simbols',
               titleofhide: 'Hide simbols',
-              hashonhover: 'passyriot'
+              hideonblur: false
             };
             options = $.extend({}, defaultOptions, userOptions, input.data());
             data = self._constructor(input, options);
@@ -184,8 +157,6 @@
             o = data.options;
             self.type(o.defaulttype, node.input);
             return $(this);
-          } else {
-            return $.error(input + 'must be input[type="password"]');
           }
         }
       });
@@ -222,6 +193,7 @@
       node.trigger = self._createTrigger(node.input);
       node.icon = self._createIcon(node.trigger);
       self._setTriggerBinds(data.node.trigger, data);
+      self._setFocusBinds(node.input, data);
       return data;
     }
   };

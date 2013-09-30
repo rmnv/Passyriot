@@ -18,37 +18,10 @@ TYPES             = ['text', 'password']
 
 self =
 
-  _setSelect: (input, start, end) ->
-    end = start unless end
-    input.each ->
-      if @setSelectionRange
-        @focus()
-        @setSelectionRange(start, end)
-      else if @createTextRange
-        range = @createTextRange()
-        range.collapse(true)
-        range.moveEnd("character", end)
-        range.moveStart("character", start)
-        range.select()
-        input.focus()
-
-  getSelect: (input) ->
-    CaretPos = 0 # IE Support
-    if document.selection
-      input.focus()
-      Sel = document.selection.createRange()
-      Sel.moveStart "character", -input.value.length
-      CaretPos = Sel.text.length
-
-      # Firefox support
-    if input.selectionStart or input.selectionStart is 0
-      CaretPos = input.selectionStart
-
-    return CaretPos
-
   # input[type="password"] / input[type="text"]
   _setInputType: (input, type, where) ->
     where.prepend(input.detach().attr('type', type))
+    log where
     input
 
   # Toggle «Show symbols» / «Hide symbols»
@@ -72,7 +45,7 @@ self =
     oldClass = ICON_OPENED_CLASS
     newClass = ICON_CLOSED_CLASS
     if type is TYPES[0]
-      oldClass = [newClass, newClass = oldClass][0] # var reverse
+      oldClass = [newClass, newClass = oldClass][0] # var swap
     icon.removeClass(oldClass).addClass(newClass)
     return icon
 
@@ -84,14 +57,13 @@ self =
       oldType = [newType, newType = oldType][0]
     return newType
 
-
   # On eye click
   _setTriggerBinds: (trigger, data) ->
     o = data.options; info = data.info; node = data.node
     trigger.on 'click.passy', (event) ->
       self.type('toggle', node.input)
       event.preventDefault()
-    # for isHasFocus = true
+    # for isHasFocus === true
     trigger.on 'mousedown.passy', ->
       info.isTriggerClick = true
       true
@@ -102,38 +74,32 @@ self =
 
 
   # On .passy__input focus
-  _setFocusBinds: (input, info) ->
+  _setFocusBinds: (input, data) ->
+    info = data.info; o = data.options
     input.on 'focusin.passy', ->
       info.isHasFocus = true
       true
     input.on 'focusout.passy', ->
       unless info.isTriggerClick
         info.isHasFocus = false
+        if o.hideonblur and o.defaulttype is 'password'
+          return self._setType('password', data)
         true
     input
 
 
-
-
-
-
   _setType: (type, data) ->
     node = data.node; info = data.info; o = data.options
-
     node.trigger = self._setTitle(node.trigger, type, o)
     node.icon = self._setIconClass(node.icon, type)
     node.input = self._setInputType(node.input, type, node.wrapper)
 
-    self._setFocusBinds(node.input, info)
-
     info.nowType = type
     info.nextType = self._getNextType(info.nowType)
-
     if info.isHasFocus then node.input.focus()
+    data
 
-    return data
-
-
+  # Public method .passyriot('type')
   type: (type, input = @) ->
     input.each ->
       data = $(this).parent().data('passy')
@@ -157,8 +123,8 @@ self =
 
   init: (userOptions) ->
     @each ->
-      unless data
-        input = $(this)
+      input = $(this)
+      unless input.parents('.'+PASSY_CLASS).length
         startTag = input.prop('tagName').toLowerCase()
         startType = input.prop('type')
         if startTag is 'input' and startType is 'password'
@@ -166,15 +132,13 @@ self =
             defaulttype: 'password' # text/password
             titleofshow: 'Show simbols'
             titleofhide: 'Hide simbols'
-            hashonhover: 'passyriot'
+            hideonblur: false
           options = $.extend {},
             defaultOptions, userOptions, input.data()
           data = self._constructor(input, options)
           node = data.node; o = data.options
           self.type(o.defaulttype, node.input)
           return $(this)
-        else
-          $.error input + 'must be input[type="password"]'
 
   destroy: () ->
     @each ->
@@ -202,6 +166,7 @@ self =
     node.trigger  = self._createTrigger(node.input)
     node.icon     = self._createIcon(node.trigger)
     self._setTriggerBinds(data.node.trigger, data)
+    self._setFocusBinds(node.input, data)
     return data
 
 # auto init
