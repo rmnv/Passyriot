@@ -46,27 +46,11 @@ self =
 
     return CaretPos
 
-
-  _getAttributes: (element) ->
-    return element.get(0).attributes
-
-  _setAttributes: (element, attributes) ->
-    i = 0
-    while i < attributes.length
-      unless attributes[i].name is 'type'
-        element.attr(attributes[i].name, attributes[i].value)
-      i++
-    return element
-
-
-
-
-  _setInputType: (oldInput, type, attributes) ->
-    return $('<input type="'+type+'">').each ->
-      newInput = $(this)
-      newInput = self._setAttributes(newInput, attributes)
-      oldInput.replaceWith(newInput)
-      return newInput
+  _setInputType: (oldInput, type, where) ->
+    newInput = oldInput.remove()
+    newInput.attr('type', type)
+    where.prepend(newInput)
+    return newInput
 
 
   _setLinkTitle: (link, type, o) ->
@@ -146,11 +130,9 @@ self =
   _setType: (type, data) ->
     node = data.node; info = data.info; o = data.options
 
-    info.attributes = self._getAttributes(node.input)
-
     node.link = self._setLinkTitle(node.link, type, o)
     node.icon = self._setIconClass(node.icon, type)
-    node.input = self._setInputType(node.input, type, info.attributes)
+    node.input = self._setInputType(node.input, type, node.wrapper)
 
     self._setFocusBinds(node.input, info)
 
@@ -198,7 +180,6 @@ self =
             tabindex:    false
           options = $.extend {},
             defaultOptions, userOptions, input.data()
-          log options
           data = self._constructor(input, options)
           node = data.node; o = data.options
           self.type(o.defaulttype, node.input)
