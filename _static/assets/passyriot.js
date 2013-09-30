@@ -7,11 +7,11 @@
 
 (function() {
   'use strict';
-  var ICON_CLASS, ICON_CLOSED_CLASS, ICON_OPENED_CLASS, INPUT_CLASS, LINK_CLASS, PASSY_CLASS, TYPES, self;
+  var ICON_CLASS, ICON_CLOSED_CLASS, ICON_OPENED_CLASS, INPUT_CLASS, PASSY_CLASS, TRIGGER_CLASS, TYPES, self;
 
   PASSY_CLASS = 'passy';
 
-  LINK_CLASS = PASSY_CLASS + '__trigger';
+  TRIGGER_CLASS = PASSY_CLASS + '__trigger';
 
   INPUT_CLASS = PASSY_CLASS + '__input';
 
@@ -57,30 +57,24 @@
       }
       return CaretPos;
     },
-    _setInputType: function(oldInput, type, where) {
-      var newInput;
-      newInput = oldInput.remove();
-      newInput.attr('type', type);
-      where.prepend(newInput);
-      return newInput;
+    _setInputType: function(input, type, where) {
+      where.prepend(input.detach().attr('type', type));
+      return input;
     },
-    _setLinkTitle: function(link, type, o) {
+    _setTitle: function(trigger, type, o) {
       var title;
       title = type === TYPES[0] ? o.titleofhide : o.titleofshow;
-      link.attr('title', title);
-      return link;
+      return trigger.attr('title', title);
     },
-    _createLink: function(insertAfter, o) {
-      var link, tabindex;
-      tabindex = o.tabindex ? '' : ' tabindex="-1"';
-      link = $('<a' + tabindex + ' class="' + LINK_CLASS + '" href="#' + o.hash + '"></a>');
-      link.insertAfter(insertAfter);
-      return link;
+    _createTrigger: function(insertAfter) {
+      var trigger;
+      trigger = $('<span class="' + TRIGGER_CLASS + '"></span>');
+      return trigger.insertAfter(insertAfter);
     },
-    _createIcon: function(where) {
+    _createIcon: function(prepend) {
       var icon;
       icon = $('<i class="' + ICON_CLASS + '">');
-      where.prepend(icon);
+      prepend.prepend(icon);
       return icon;
     },
     _setIconClass: function(icon, type) {
@@ -102,29 +96,24 @@
       }
       return newType;
     },
-    _setLinkBinds: function(link, data) {
+    _setTriggerBinds: function(trigger, data) {
       var info, node, o;
       o = data.options;
       info = data.info;
       node = data.node;
-      link.on('click.passy', function(event) {
+      trigger.on('click.passy', function(event) {
         self.type('toggle', node.input);
         return event.preventDefault();
       });
-      link.on('mousedown.passy', function() {
+      trigger.on('mousedown.passy', function() {
         info.isTriggerClick = true;
         return true;
       });
-      link.on('mouseup.passy', function() {
+      trigger.on('mouseup.passy', function() {
         info.isTriggerClick = false;
         return true;
       });
-      if (!o.tabindex) {
-        link.on('focus.passy', function() {
-          return $(this).blur();
-        });
-      }
-      return link;
+      return trigger;
     },
     _setFocusBinds: function(input, info) {
       input.on('focusin.passy', function() {
@@ -144,7 +133,7 @@
       node = data.node;
       info = data.info;
       o = data.options;
-      node.link = self._setLinkTitle(node.link, type, o);
+      node.trigger = self._setTitle(node.trigger, type, o);
       node.icon = self._setIconClass(node.icon, type);
       node.input = self._setInputType(node.input, type, node.wrapper);
       self._setFocusBinds(node.input, info);
@@ -184,11 +173,10 @@
           startType = input.prop('type');
           if (startTag === 'input' && startType === 'password') {
             defaultOptions = {
-              defaulttype: 'text',
+              defaulttype: 'password',
               titleofshow: 'Show simbols',
               titleofhide: 'Hide simbols',
-              hashonhover: 'passyriot',
-              tabindex: false
+              hashonhover: 'passyriot'
             };
             options = $.extend({}, defaultOptions, userOptions, input.data());
             data = self._constructor(input, options);
@@ -210,7 +198,7 @@
         o = data.options;
         info = data.info;
         self._setType('password', data);
-        node.link.remove();
+        node.trigger.remove();
         node.input.off('.passy').unwrap(node).removeClass(INPUT_CLASS);
         return $(this);
       });
@@ -231,9 +219,9 @@
       info.isFirst = true;
       node.wrapper = wrapper;
       node.input = input.addClass(INPUT_CLASS);
-      node.link = self._createLink(node.input, o);
-      node.icon = self._createIcon(node.link);
-      self._setLinkBinds(data.node.link, data);
+      node.trigger = self._createTrigger(node.input);
+      node.icon = self._createIcon(node.trigger);
+      self._setTriggerBinds(data.node.trigger, data);
       return data;
     }
   };

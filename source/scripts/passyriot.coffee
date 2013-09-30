@@ -7,7 +7,7 @@
 'use strict'
 
 PASSY_CLASS       = 'passy'
-LINK_CLASS        = PASSY_CLASS  + '__trigger'
+TRIGGER_CLASS     = PASSY_CLASS  + '__trigger'
 INPUT_CLASS       = PASSY_CLASS  + '__input'
 ICON_CLASS        = PASSY_CLASS  + '__icon'
 ICON_CLOSED_CLASS = ICON_CLASS   + '_closed'
@@ -46,32 +46,28 @@ self =
 
     return CaretPos
 
-  _setInputType: (oldInput, type, where) ->
-    newInput = oldInput.remove()
-    newInput.attr('type', type)
-    where.prepend(newInput)
-    return newInput
+  # input[type="password"] / input[type="text"]
+  _setInputType: (input, type, where) ->
+    where.prepend(input.detach().attr('type', type))
+    input
 
-
-  _setLinkTitle: (link, type, o) ->
+  # Toggle «Show symbols» / «Hide symbols»
+  _setTitle: (trigger, type, o) ->
     title = if type is TYPES[0] then o.titleofhide else o.titleofshow
-    link.attr('title', title)
-    return link
+    trigger.attr('title', title)
 
-  # a.passy__link
-  _createLink: (insertAfter, o) ->
-    tabindex = if o.tabindex then '' else ' tabindex="-1"'
-    link = $('<a'+tabindex+' class="'+LINK_CLASS+'" href="#'+o.hash+'"></a>')
-    link.insertAfter(insertAfter)
-    return link
+  # Create span.passy__trigger
+  _createTrigger: (insertAfter) ->
+    trigger = $('<span class="'+TRIGGER_CLASS+'"></span>')
+    trigger.insertAfter(insertAfter)
 
-  # i.passy__icon
-  _createIcon: (where) ->
+  # Create i.passy__icon
+  _createIcon: (prepend) ->
     icon = $('<i class="'+ICON_CLASS+'">')
-    where.prepend(icon)
+    prepend.prepend(icon)
     return icon
 
-  # toggle passy__icon_closed / passy__icon_opened
+  # Toggle passy__icon_closed / passy__icon_opened
   _setIconClass: (icon, type) ->
     oldClass = ICON_OPENED_CLASS
     newClass = ICON_CLOSED_CLASS
@@ -80,36 +76,32 @@ self =
     icon.removeClass(oldClass).addClass(newClass)
     return icon
 
-
   # pass 'text', get 'password'
   _getNextType: (nowType) ->
     oldType = TYPES[0]
     newType = TYPES[1]
     if nowType is newType
-      oldType = [newType, newType = oldType][0] # var reverse
+      oldType = [newType, newType = oldType][0]
     return newType
 
 
-  _setLinkBinds: (link, data) ->
+  # On eye click
+  _setTriggerBinds: (trigger, data) ->
     o = data.options; info = data.info; node = data.node
-    link.on 'click.passy', (event) ->
+    trigger.on 'click.passy', (event) ->
       self.type('toggle', node.input)
       event.preventDefault()
     # for isHasFocus = true
-    link.on 'mousedown.passy', ->
+    trigger.on 'mousedown.passy', ->
       info.isTriggerClick = true
       true
-    link.on 'mouseup.passy', ->
+    trigger.on 'mouseup.passy', ->
       info.isTriggerClick = false
       true
-    unless o.tabindex
-      # remove outline for trigger when tabindex="-1"
-      link.on 'focus.passy', ->
-        $(this).blur()
-    return link
+    trigger
 
 
-
+  # On .passy__input focus
   _setFocusBinds: (input, info) ->
     input.on 'focusin.passy', ->
       info.isHasFocus = true
@@ -118,9 +110,7 @@ self =
       unless info.isTriggerClick
         info.isHasFocus = false
         true
-
-
-    return input
+    input
 
 
 
@@ -130,7 +120,7 @@ self =
   _setType: (type, data) ->
     node = data.node; info = data.info; o = data.options
 
-    node.link = self._setLinkTitle(node.link, type, o)
+    node.trigger = self._setTitle(node.trigger, type, o)
     node.icon = self._setIconClass(node.icon, type)
     node.input = self._setInputType(node.input, type, node.wrapper)
 
@@ -173,11 +163,10 @@ self =
         startType = input.prop('type')
         if startTag is 'input' and startType is 'password'
           defaultOptions =
-            defaulttype: 'text' # text/password
+            defaulttype: 'password' # text/password
             titleofshow: 'Show simbols'
             titleofhide: 'Hide simbols'
             hashonhover: 'passyriot'
-            tabindex:    false
           options = $.extend {},
             defaultOptions, userOptions, input.data()
           data = self._constructor(input, options)
@@ -192,7 +181,7 @@ self =
       data = $(this).parent().data('passy')
       node = data.node; o = data.options; info = data.info
       self._setType('password', data)
-      node.link.remove()
+      node.trigger.remove()
       node.input.off('.passy').unwrap(node).removeClass(INPUT_CLASS)
       return $(this)
 
@@ -210,9 +199,9 @@ self =
     info.isFirst  = true
     node.wrapper  = wrapper
     node.input    = input.addClass(INPUT_CLASS)
-    node.link     = self._createLink(node.input, o)
-    node.icon     = self._createIcon(node.link)
-    self._setLinkBinds(data.node.link, data)
+    node.trigger  = self._createTrigger(node.input)
+    node.icon     = self._createIcon(node.trigger)
+    self._setTriggerBinds(data.node.trigger, data)
     return data
 
 # auto init
