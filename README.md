@@ -14,7 +14,7 @@ Passyriot.js — jQuery плагин, позволяющий показыват
 
 
 ## Базовое использование
-1. Подключите jQuery (минимальная версия — 1.7.2), passyriot.js и passyriot.css
+1. Подключите jQuery (1.7.2 и новее), passyriot.js и passyriot.css
 2. Добавьте к вашему полю с паролем класс `passyriot`
 
 	    <head>
