@@ -14,11 +14,11 @@ Passyriot.js — jQuery плагин, позволяющий показыват
 
 
 ## Базовое использование
-1. Подключите jQuery, passyriot.js и passyriot.css
+1. Подключите jQuery (минимальная версия — 1.7.2), passyriot.js и passyriot.css
 2. Добавьте к вашему полю с паролем класс `passyriot`
 
 	    <head>
-    	    <script src="jquery-1.10.2.min.js"></script>
+    	    <script src="jquery.js"></script>
 			<link rel="stylesheet" href="passyriot.css" />
 			<script src="passyriot.js">
 		</head>
