@@ -40,7 +40,7 @@ Passyriot.js — jQuery плагин, позволяющий показыват
 - `iconclass`: `passy__icon` — класс иконки
 - `iconopenedclass`: `passy__icon_opened`
 - `iconclosedclass`: `passy__icon_closed`
-- `hideonblur`: `false` / `true` — прятать символы при потере фокуса
+- `hideonblur`: `false` / `true` — прятать символы при потере фокуса (приоритет над defaulttype)
 - `auto`: `true` / `false` — автоматическая инициализация
 
 Опции можно прописывать как в data-атрибутах, так и в массиве, передающимся плагину. У data-атрибутов приоритет будет выше.
