@@ -37,6 +37,9 @@ Passyriot.js — jQuery плагин, позволяющий показыват
 - `defaulttype`: `"password"` / `"text"` — показывать или скрывать символы по-умолчанию
 - `titleofshow`: `"Show simbols"` — подсказка на глазике
 - `titleofhide`: `"Hide simbold"`
+- `iconclass`: `passy__icon` — класс иконки
+- `iconopenedclass`: `passy__icon_opened`
+- `iconclosedclass`: `passy__icon_closed`
 - `hideonblur`: `false` / `true` — прятать символы при потере фокуса
 - `auto`: `true` / `false` — автоматическая инициализация
 

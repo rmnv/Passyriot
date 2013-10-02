@@ -1,7 +1,13 @@
 ###
-  input[type="password"] / input[type="text"]
-  © 2013 by Anton Romanov
-  anton@rmnv.ru
+  Passyriot
+  https://github.com/rmnv/Passyriot
+
+  jQuery plugin for password preview
+
+  @requires jQuery (1.7.2 or later)
+  @author Anton Romanov
+  @copyright 2013 Anton Romanov (rmnv.ru)
+  @license MIT
 ###
 
 'use strict'
@@ -18,38 +24,49 @@ TYPES             = ['text', 'password']
 
 self =
 
-  # input[type="password"] / input[type="text"]
-  _setInputType: (input, type, where) ->
-    where.prepend(input.detach().attr('type', type))
-    log where
+  ###
+  toggle type of input: password/text
+  ###
+  _setInputType: (input, type, prepend) ->
+    prepend.prepend(input.detach().attr('type', type))
     input
 
-  # Toggle «Show symbols» / «Hide symbols»
+  ###
+  Toggle «Show symbols» / «Hide symbols» in title
+  ###
   _setTitle: (trigger, type, o) ->
     title = if type is TYPES[0] then o.titleofhide else o.titleofshow
     trigger.attr('title', title)
 
-  # Create span.passy__trigger
+  ###
+  Create span.passy__trigger
+  ###
   _createTrigger: (insertAfter) ->
     trigger = $('<span class="'+TRIGGER_CLASS+'"></span>')
     trigger.insertAfter(insertAfter)
 
-  # Create i.passy__icon
-  _createIcon: (prepend) ->
-    icon = $('<i class="'+ICON_CLASS+'">')
+  ###
+  Create i.passy__icon
+  ###
+  _createIcon: (prepend, o) ->
+    icon = $('<i class="'+o.iconclass+'">')
     prepend.prepend(icon)
-    return icon
+    icon
 
-  # Toggle passy__icon_closed / passy__icon_opened
-  _setIconClass: (icon, type) ->
-    oldClass = ICON_OPENED_CLASS
-    newClass = ICON_CLOSED_CLASS
+  ###
+  Toggle passy__icon_closed / passy__icon_opened
+  ###
+  _setIconClass: (icon, type, o) ->
+    oldClass = o.iconclosedclass
+    newClass = o.iconopenedclass
     if type is TYPES[0]
       oldClass = [newClass, newClass = oldClass][0] # var swap
     icon.removeClass(oldClass).addClass(newClass)
     return icon
 
-  # pass 'text', get 'password'
+  ###
+  Pass «text», get «password»
+  ###
   _getNextType: (nowType) ->
     oldType = TYPES[0]
     newType = TYPES[1]
@@ -57,68 +74,42 @@ self =
       oldType = [newType, newType = oldType][0]
     return newType
 
-  # On eye click
-  _setTriggerBinds: (trigger, data) ->
-    o = data.options; info = data.info; node = data.node
+  ###
+  On eye click
+  ###
+  _setTriggerBinds: (trigger, node) ->
     trigger.on 'click.passy', (event) ->
       self.type('toggle', node.input)
+      node.input.focus()
       event.preventDefault()
-    # for isHasFocus === true
-    trigger.on 'mousedown.passy', ->
-      info.isTriggerClick = true
-      true
-    trigger.on 'mouseup.passy', ->
-      info.isTriggerClick = false
-      true
-    trigger
-
-
-  # On .passy__input focus
-  _setFocusBinds: (input, data) ->
-    info = data.info; o = data.options
-    input.on 'focusin.passy', ->
-      info.isHasFocus = true
-      true
-    input.on 'focusout.passy', ->
-      unless info.isTriggerClick
-        info.isHasFocus = false
-        if o.hideonblur and o.defaulttype is 'password'
-          return self._setType('password', data)
-        true
-    input
 
 
   _setType: (type, data) ->
     node = data.node; info = data.info; o = data.options
-    node.trigger = self._setTitle(node.trigger, type, o)
-    node.icon = self._setIconClass(node.icon, type)
-    node.input = self._setInputType(node.input, type, node.wrapper)
-
-    info.nowType = type
+    node.trigger  = self._setTitle(node.trigger, type, o)
+    node.icon     = self._setIconClass(node.icon, type, o)
+    node.input    = self._setInputType(node.input, type, node.wrapper)
+    info.nowType  = type
     info.nextType = self._getNextType(info.nowType)
-    if info.isHasFocus then node.input.focus()
     data
 
-  # Public method .passyriot('type')
+  ###
+  Public method .passyriot('type')
+  ###
   type: (type, input = @) ->
     input.each ->
       data = $(this).parent().data('passy')
-      node = data.node; o = data.options; info = data.info
-
+      info = data.info
       # input.passyriot('type')
       unless type
         return info.nowType
-
       # input.passyriot('type', 'toggle') or click
       else if type is 'toggle'
         return self._setType(info.nextType, data)
-
       # input.passyriot('type', '...')
       else if type is info.nextType or info.isFirst
         info.isFirst = false
         return self._setType(type, data)
-
-
 
 
   init: (userOptions) ->
@@ -133,21 +124,24 @@ self =
             titleofshow: 'Show simbols'
             titleofhide: 'Hide simbols'
             hideonblur: false
+            iconclass: ICON_CLASS
+            iconopenedclass: ICON_OPENED_CLASS
+            iconclosedclass: ICON_CLOSED_CLASS
           options = $.extend {},
             defaultOptions, userOptions, input.data()
           data = self._constructor(input, options)
           node = data.node; o = data.options
           self.type(o.defaulttype, node.input)
-          return $(this)
+          input
 
   destroy: () ->
     @each ->
       data = $(this).parent().data('passy')
-      node = data.node; o = data.options; info = data.info
+      node = data.node
       self._setType('password', data)
       node.trigger.remove()
       node.input.off('.passy').unwrap(node).removeClass(INPUT_CLASS)
-      return $(this)
+      $(this)
 
   _constructor: (input, options) ->
     wrapper = input.wrap('<span class="'+PASSY_CLASS+'">').parent()
@@ -164,10 +158,9 @@ self =
     node.wrapper  = wrapper
     node.input    = input.addClass(INPUT_CLASS)
     node.trigger  = self._createTrigger(node.input)
-    node.icon     = self._createIcon(node.trigger)
-    self._setTriggerBinds(data.node.trigger, data)
-    self._setFocusBinds(node.input, data)
-    return data
+    node.icon     = self._createIcon(node.trigger, o)
+    self._setTriggerBinds(data.node.trigger, node)
+    data
 
 # auto init
 $ ->

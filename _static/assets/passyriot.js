@@ -1,7 +1,13 @@
 /*
-  input[type="password"] / input[type="text"]
-  © 2013 by Anton Romanov
-  anton@rmnv.ru
+  Passyriot
+  https://github.com/rmnv/Passyriot
+
+  jQuery plugin for password preview
+
+  @requires jQuery (1.7.2 or later)
+  @author Anton Romanov
+  @copyright 2013 Anton Romanov (rmnv.ru)
+  @license MIT
 */
 
 
@@ -24,37 +30,60 @@
   TYPES = ['text', 'password'];
 
   self = {
-    _setInputType: function(input, type, where) {
-      where.prepend(input.detach().attr('type', type));
-      log(where);
+    /*
+    toggle type of input: password/text
+    */
+
+    _setInputType: function(input, type, prepend) {
+      prepend.prepend(input.detach().attr('type', type));
       return input;
     },
+    /*
+    Toggle «Show symbols» / «Hide symbols» in title
+    */
+
     _setTitle: function(trigger, type, o) {
       var title;
       title = type === TYPES[0] ? o.titleofhide : o.titleofshow;
       return trigger.attr('title', title);
     },
+    /*
+    Create span.passy__trigger
+    */
+
     _createTrigger: function(insertAfter) {
       var trigger;
       trigger = $('<span class="' + TRIGGER_CLASS + '"></span>');
       return trigger.insertAfter(insertAfter);
     },
-    _createIcon: function(prepend) {
+    /*
+    Create i.passy__icon
+    */
+
+    _createIcon: function(prepend, o) {
       var icon;
-      icon = $('<i class="' + ICON_CLASS + '">');
+      icon = $('<i class="' + o.iconclass + '">');
       prepend.prepend(icon);
       return icon;
     },
-    _setIconClass: function(icon, type) {
+    /*
+    Toggle passy__icon_closed / passy__icon_opened
+    */
+
+    _setIconClass: function(icon, type, o) {
       var newClass, oldClass;
-      oldClass = ICON_OPENED_CLASS;
-      newClass = ICON_CLOSED_CLASS;
+      oldClass = o.iconclosedclass;
+      newClass = o.iconopenedclass;
       if (type === TYPES[0]) {
         oldClass = [newClass, newClass = oldClass][0];
       }
       icon.removeClass(oldClass).addClass(newClass);
       return icon;
     },
+    /*
+    Pass «text», get «password»
+    */
+
     _getNextType: function(nowType) {
       var newType, oldType;
       oldType = TYPES[0];
@@ -64,43 +93,16 @@
       }
       return newType;
     },
-    _setTriggerBinds: function(trigger, data) {
-      var info, node, o;
-      o = data.options;
-      info = data.info;
-      node = data.node;
-      trigger.on('click.passy', function(event) {
+    /*
+    On eye click
+    */
+
+    _setTriggerBinds: function(trigger, node) {
+      return trigger.on('click.passy', function(event) {
         self.type('toggle', node.input);
+        node.input.focus();
         return event.preventDefault();
       });
-      trigger.on('mousedown.passy', function() {
-        info.isTriggerClick = true;
-        return true;
-      });
-      trigger.on('mouseup.passy', function() {
-        info.isTriggerClick = false;
-        return true;
-      });
-      return trigger;
-    },
-    _setFocusBinds: function(input, data) {
-      var info, o;
-      info = data.info;
-      o = data.options;
-      input.on('focusin.passy', function() {
-        info.isHasFocus = true;
-        return true;
-      });
-      input.on('focusout.passy', function() {
-        if (!info.isTriggerClick) {
-          info.isHasFocus = false;
-          if (o.hideonblur && o.defaulttype === 'password') {
-            return self._setType('password', data);
-          }
-          return true;
-        }
-      });
-      return input;
     },
     _setType: function(type, data) {
       var info, node, o;
@@ -108,24 +110,23 @@
       info = data.info;
       o = data.options;
       node.trigger = self._setTitle(node.trigger, type, o);
-      node.icon = self._setIconClass(node.icon, type);
+      node.icon = self._setIconClass(node.icon, type, o);
       node.input = self._setInputType(node.input, type, node.wrapper);
       info.nowType = type;
       info.nextType = self._getNextType(info.nowType);
-      if (info.isHasFocus) {
-        node.input.focus();
-      }
       return data;
     },
+    /*
+    Public method .passyriot('type')
+    */
+
     type: function(type, input) {
       if (input == null) {
         input = this;
       }
       return input.each(function() {
-        var data, info, node, o;
+        var data, info;
         data = $(this).parent().data('passy');
-        node = data.node;
-        o = data.options;
         info = data.info;
         if (!type) {
           return info.nowType;
@@ -149,25 +150,26 @@
               defaulttype: 'password',
               titleofshow: 'Show simbols',
               titleofhide: 'Hide simbols',
-              hideonblur: false
+              hideonblur: false,
+              iconclass: ICON_CLASS,
+              iconopenedclass: ICON_OPENED_CLASS,
+              iconclosedclass: ICON_CLOSED_CLASS
             };
             options = $.extend({}, defaultOptions, userOptions, input.data());
             data = self._constructor(input, options);
             node = data.node;
             o = data.options;
             self.type(o.defaulttype, node.input);
-            return $(this);
+            return input;
           }
         }
       });
     },
     destroy: function() {
       return this.each(function() {
-        var data, info, node, o;
+        var data, node;
         data = $(this).parent().data('passy');
         node = data.node;
-        o = data.options;
-        info = data.info;
         self._setType('password', data);
         node.trigger.remove();
         node.input.off('.passy').unwrap(node).removeClass(INPUT_CLASS);
@@ -191,9 +193,8 @@
       node.wrapper = wrapper;
       node.input = input.addClass(INPUT_CLASS);
       node.trigger = self._createTrigger(node.input);
-      node.icon = self._createIcon(node.trigger);
-      self._setTriggerBinds(data.node.trigger, data);
-      self._setFocusBinds(node.input, data);
+      node.icon = self._createIcon(node.trigger, o);
+      self._setTriggerBinds(data.node.trigger, node);
       return data;
     }
   };
