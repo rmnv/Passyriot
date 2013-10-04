@@ -3,17 +3,20 @@
   <head>
     <title>Passy Riot</title>
     <meta charset="utf-8">
+    <link href="assets/fonts.css" rel="stylesheet">
     <link href="assets/passyriot.css" rel="stylesheet">
-    <script src="assets/jquery.js"></script>
+    <link href="assets/main.css" rel="stylesheet">
+    <script src="assets/jquery-1.10.2.min.js"></script>
     <script src="assets/passyriot.js"></script>
     <script src="assets/main.js"></script>
   </head>
   <body>
-    <p>
-      <input type="password" placeholder="пароль" value="asffd" data-defaulttype="password" class="passyriot">
-    </p>
-    <p>
-      <input type="password" placeholder="пароль" value="asffd" class="passyriot">
-    </p>
+    <div class="pussyriot"></div>
+    <h1>Passyriot<small>.js</small></h1>
+    <div class="preview">
+      <input type="password" class="preview__input" maxlength="15" placeholder="Пароль" value="рыба-меч"/><span class="preview__arrow"></span><span class="preview__hint"></span>
+    </div>
+    <p>Плагин, позволяющий показывать<br>и скрывать пароль за звёздочками.</p>
+    <p>Подробности на <a href="https://github.com/rmnv/Passyriot">гитхабе</a></p>
   </body>
 </html>

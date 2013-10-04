@@ -1,7 +1,14 @@
 include _includes
 
 +layout
-  p
-    input(type="password", placeholder="пароль", value="asffd", data-defaulttype="password").passyriot
-  p
-    input(type="password", placeholder="пароль", value="asffd").passyriot
+  .pussyriot
+
+  h1 Passyriot<small>.js</small>
+
+
+  +b.preview
+    +e('input').input(type="password", maxlength="15", placeholder="Пароль", value="рыба-меч")
+    +e('span').arrow
+    +e('span').hint
+  p Плагин, позволяющий показывать<br>и скрывать пароль за звёздочками.
+  p Подробности на <a href="https://github.com/rmnv/Passyriot">гитхабе</a>
