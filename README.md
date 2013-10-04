@@ -60,9 +60,27 @@ Passyriot.js — jQuery плагин, позволяющий показыват
 	  });
 	</script>
 	
+## Колбэки
+- `onTriggerClick`: `function(data){}`
+- `onTypeChange`: `function(data){}`
+
+Принимают параметр `data`, где `data.node` — DOM элементы; `data.info` — информация о текущих состояниях (например, `data.info.nowType` / `data.info.nextType`); `data.options` — опции.
+    
+    input.passyriot({
+    	onTypeChange: function(data) {
+    		if(data.info.nowType==='text'){
+    			$('.some-hint').html('Показать пароль!');
+    		} else {
+    			$('.some-hint').html('Скрыть!');
+    		}    		
+    	}
+    })
+    
+ 
 
 ## АПИ
 	input.passyriot('type', 'toggle')
 	input.passyriot('type', 'password')
 	input.passyriot('type', 'text')
+	input.passyriot('type')	
 	input.passyriot('destroy')
