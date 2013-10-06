@@ -34,6 +34,35 @@ Passyriot.js — jQuery плагин, позволяющий показыват
 1. Автоматический: плагин сам начинает работать на нужных полях с классом `passyriot`.
 2. Привычный для jQuery: `$('.some-class').passyriot()`. В этом случае можно использовать любой айди, или класс, кроме зарезервированного `.passyriot`.
 
+## Настройка отображения
+Весь внешний вид плагина настривается в стилях.
+
+Позиция переключателя:
+
+	.passy__trigger {
+		margin-left: -23px;
+		margin-top: 4px;
+	}
+
+Иконка:
+
+	.passy__icon {
+		width: 16px;
+		height: 16px;
+		background: url('icon.png') no-repeat
+	}
+	.passy__icon_closed {
+		background-position: 0 0;
+	}
+	.passy__icon_opened {
+		background-position: 0 -16px;
+	}
+
+В [примере](http://rmnv.ru/passyriot/) стандартная иконка изменена на SVG.
+
+	
+
+
 
 ## Опции
 - `defaulttype`: `"password"` / `"text"` — показывать или скрывать символы по-умолчанию
